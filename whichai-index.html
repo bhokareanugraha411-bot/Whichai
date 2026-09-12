@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhichAI — Find the Right AI for Your Work</title>
+<style>
+:root{--bg:#080b12;--card:#111722;--card2:#161e2c;--text:#f5f7fb;--muted:#9aa6b7;--line:#283244;--accent:#7c5cff;--accent2:#20d3a8;--danger:#ff647c}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 7%;border-bottom:1px solid var(--line);position:sticky;top:0;background:#080b12ee;backdrop-filter:blur(12px);z-index:3}
+.logo{font-size:25px;font-weight:800}.logo span{color:var(--accent)} button{border:0;border-radius:12px;padding:13px 18px;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:#fff}.secondary{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.hero{max-width:1050px;margin:auto;text-align:center;padding:80px 20px 35px}.badge{color:var(--accent2);font-weight:700}.hero h1{font-size:clamp(38px,7vw,70px);margin:15px 0}.hero h1 span{color:var(--accent)}.hero p{color:var(--muted);font-size:18px;line-height:1.6}
+.app{max-width:1050px;margin:0 auto;padding:20px}.box{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:25px;margin:20px 0}
+label{display:block;font-weight:700;margin:15px 0 8px}select,textarea,input{width:100%;background:#0b1019;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:14px;font-size:15px}textarea{min-height:110px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.actions{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+.result{display:none}.winner{text-align:center;padding:25px;border-radius:18px;background:linear-gradient(135deg,#171337,#102b29);margin:18px 0}.winner h2{font-size:32px;margin:8px}.toolgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.tool{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:18px}.tool h3{margin:0 0 8px}.score{color:#ffd166;font-size:14px}.muted{color:var(--muted);line-height:1.55}.tag{display:inline-block;background:#242b3c;color:#c7ced9;border-radius:99px;padding:5px 9px;margin:3px;font-size:12px}
+footer{text-align:center;color:var(--muted);padding:50px 20px}.small{font-size:13px;color:var(--muted)}
+@media(max-width:700px){.grid{grid-template-columns:1fr}nav{padding:15px 5%}.hero{padding-top:55px}.app{padding:12px}}
+</style>
+</head>
+<body>
+<nav><div class="logo">Which<span>AI</span> ⚡</div><button class="secondary" onclick="document.getElementById('directory').scrollIntoView({behavior:'smooth'})">50 AI Tools</button></nav>
+
+<section class="hero">
+<div class="badge">🤖 AI COMPARISON ENGINE</div>
+<h1>Don't Guess. Find the <span>Right AI.</span></h1>
+<p>Compare two popular AI tools for your specific task and get a fast recommendation based on a transparent capability scoring system.</p>
+</section>
+
+<main class="app">
+<div class="box">
+<h2>⚔️ Compare Two AIs</h2>
+<div class="grid">
+<div><label>First AI</label><select id="ai1"></select></div>
+<div><label>Second AI</label><select id="ai2"></select></div>
+</div>
+<label>What do you want to do?</label>
+<textarea id="task" placeholder="Example: I want to build a mobile app without coding and I am a beginner."></textarea>
+<div class="actions"><button class="primary" onclick="compare()">⚡ Compare Now</button><button class="secondary" onclick="randomCompare()">🎲 Random Example</button></div>
+<p class="small">Recommendations are generated from the structured tool data in this website. Always check official pricing, availability and current features before choosing a tool.</p>
+</div>
+
+<div class="box result" id="result">
+<div class="winner" id="winner"></div>
+<div class="grid" id="cards"></div>
+<div class="box" style="margin-top:18px"><h3>🎯 Why this recommendation?</h3><p class="muted" id="reason"></p></div>
+</div>
+
+<div class="box" id="directory">
+<h2>🧠 AI Directory — 50 Tools</h2>
+<p class="muted">Version 1 includes tools across chat, coding, image, video, writing, music, research and productivity.</p>
+<div class="toolgrid" id="toolList"></div>
+</div>
+</main>
+
+<footer>WhichAI ⚡ Version 1 • Built for fast AI discovery and comparison</footer>
+
+<script>
+const tools = [
+{name:"ChatGPT",cat:"Chat & General AI",url:"https://chatgpt.com",desc:"General AI assistant for writing, reasoning, coding and creative work.",s:{chat:10,coding:9,writing:9,research:7,image:8,app:8,beginner:10}},
+{name:"Gemini",cat:"Chat & General AI",url:"https://gemini.google.com",desc:"General AI assistant with strong multimodal and Google ecosystem capabilities.",s:{chat:9,coding:8,writing:8,research:9,image:7,app:7,beginner:9}},
+{name:"Claude",cat:"Chat & General AI",url:"https://claude.ai",desc:"AI assistant known for writing, analysis and long-form reasoning.",s:{chat:9,coding:10,writing:10,research:8,image:5,app:8,beginner:8}},
+{name:"Grok",cat:"Chat & General AI",url:"https://grok.com",desc:"Conversational AI assistant with general-purpose capabilities.",s:{chat:9,coding:7,writing:7,research:7,image:7,app:6,beginner:8}},
+{name:"Perplexity",cat:"Research",url:"https://www.perplexity.ai",desc:"AI-powered answer and research tool focused on finding information.",s:{chat:8,coding:6,writing:7,research:10,image:3,app:4,beginner:10}},
+{name:"Microsoft Copilot",cat:"Chat & Productivity",url:"https://copilot.microsoft.com",desc:"AI assistant integrated with Microsoft's ecosystem.",s:{chat:8,coding:8,writing:8,research:7,image:6,app:6,beginner:9}},
+{name:"DeepSeek",cat:"Chat & Coding",url:"https://www.deepseek.com",desc:"AI assistant and model platform with strong technical capabilities.",s:{chat:8,coding:9,writing:7,research:7,image:3,app:6,beginner:7}},
+{name:"Poe",cat:"AI Platform",url:"https://poe.com",desc:"Platform for accessing and experimenting with multiple AI models.",s:{chat:9,coding:8,writing:8,research:7,image:6,app:6,beginner:9}},
+{name:"Cursor",cat:"Coding",url:"https://www.cursor.com",desc:"AI-assisted code editor for software development.",s:{chat:6,coding:10,writing:4,research:4,image:1,app:9,beginner:7}},
+{name:"GitHub Copilot",cat:"Coding",url:"https://github.com/features/copilot",desc:"AI coding assistant integrated into developer workflows.",s:{chat:6,coding:10,writing:4,research:4,image:1,app:8,beginner:8}},
+{name:"Windsurf",cat:"Coding",url:"https://windsurf.com",desc:"AI development environment and coding assistant.",s:{chat:6,coding:10,writing:4,research:4,image:1,app:9,beginner:7}},
+{name:"Replit",cat:"Coding & Apps",url:"https://replit.com",desc:"Browser-based coding platform with AI-assisted development.",s:{chat:6,coding:9,writing:4,research:4,image:1,app:10,beginner:9}},
+{name:"Lovable",cat:"App Builder",url:"https://lovable.dev",desc:"AI-powered platform for building web applications from prompts.",s:{chat:5,coding:7,writing:4,research:3,image:2,app:10,beginner:10}},
+{name:"Bolt",cat:"App Builder",url:"https://bolt.new",desc:"Prompt-based web application building environment.",s:{chat:5,coding:8,writing:4,research:3,image:2,app:10,beginner:9}},
+{name:"v0",cat:"App Builder",url:"https://v0.dev",desc:"AI tool for generating web interfaces and application code.",s:{chat:5,coding:9,writing:4,research:3,image:2,app:9,beginner:8}},
+{name:"Firebase Studio",cat:"App Builder",url:"https://firebase.studio",desc:"Cloud development environment for building applications.",s:{chat:5,coding:9,writing:4,research:3,image:1,app:9,beginner:7}},
+{name:"Midjourney",cat:"Image",url:"https://www.midjourney.com",desc:"AI image generation focused on creative visuals.",s:{chat:2,coding:1,writing:2,research:1,image:10,app:1,beginner:7}},
+{name:"DALL·E",cat:"Image",url:"https://openai.com",desc:"AI image generation for creating visuals from text.",s:{chat:3,coding:1,writing:2,research:1,image:9,app:1,beginner:9}},
+{name:"Adobe Firefly",cat:"Image",url:"https://firefly.adobe.com",desc:"Generative AI image and creative tool ecosystem.",s:{chat:2,coding:1,writing:3,research:1,image:9,app:2,beginner:8}},
+{name:"Leonardo AI",cat:"Image",url:"https://leonardo.ai",desc:"AI image generation and creative asset platform.",s:{chat:2,coding:1,writing:2,research:1,image:9,app:2,beginner:8}},
+{name:"Ideogram",cat:"Image",url:"https://ideogram.ai",desc:"AI image generation tool with emphasis on design and text in images.",s:{chat:2,coding:1,writing:2,research:1,image:9,app:1,beginner:8}},
+{name:"Canva AI",cat:"Design",url:"https://www.canva.com",desc:"Design platform with AI-powered content and creative features.",s:{chat:4,coding:1,writing:6,research:2,image:8,app:2,beginner:10}},
+{name:"Runway",cat:"Video",url:"https://runwayml.com",desc:"AI creative platform for video generation and editing.",s:{chat:2,coding:1,writing:2,research:1,image:8,app:2,beginner:7}},
+{name:"Kling",cat:"Video",url:"https://klingai.com",desc:"AI platform for generating videos from prompts and images.",s:{chat:2,coding:1,writing:2,research:1,image:8,app:1,beginner:7}},
+{name:"Pika",cat:"Video",url:"https://pika.art",desc:"AI video generation and creative video effects.",s:{chat:2,coding:1,writing:2,research:1,image:7,app:1,beginner:8}},
+{name:"Luma",cat:"Video",url:"https://lumalabs.ai",desc:"AI tools for video and visual generation.",s:{chat:2,coding:1,writing:2,research:1,image:8,app:2,beginner:7}},
+{name:"Sora",cat:"Video",url:"https://openai.com",desc:"AI video generation technology and creative workflows.",s:{chat:3,coding:1,writing:2,research:1,image:9,app:1,beginner:8}},
+{name:"Veo",cat:"Video",url:"https://deepmind.google",desc:"Advanced AI video generation technology.",s:{chat:2,coding:1,writing:2,research:1,image:9,app:1,beginner:6}},
+{name:"CapCut AI",cat:"Video",url:"https://www.capcut.com",desc:"Video editor with AI-assisted creation features.",s:{chat:2,coding:1,writing:3,research:1,image:7,app:1,beginner:10}},
+{name:"Suno",cat:"Music",url:"https://suno.com",desc:"AI music generation from text prompts.",s:{chat:2,coding:1,writing:2,research:1,image:2,app:1,beginner:9,music:10}},
+{name:"Udio",cat:"Music",url:"https://www.udio.com",desc:"AI music creation and generation platform.",s:{chat:2,coding:1,writing:2,research:1,image:2,app:1,beginner:8,music:10}},
+{name:"Jasper",cat:"Writing",url:"https://www.jasper.ai",desc:"AI platform focused on marketing and business content.",s:{chat:7,coding:2,writing:10,research:5,image:3,app:2,beginner:9}},
+{name:"Copy.ai",cat:"Writing",url:"https://www.copy.ai",desc:"AI writing tool for marketing and business workflows.",s:{chat:7,coding:2,writing:9,research:5,image:2,app:2,beginner:9}},
+{name:"Grammarly",cat:"Writing",url:"https://www.grammarly.com",desc:"AI writing assistance, grammar and communication improvement.",s:{chat:4,coding:1,writing:9,research:2,image:1,app:1,beginner:10}},
+{name:"Notion AI",cat:"Productivity",url:"https://www.notion.so",desc:"AI features for notes, documents and productivity workflows.",s:{chat:6,coding:2,writing:8,research:5,image:2,app:2,beginner:9}},
+{name:"Otter.ai",cat:"Productivity",url:"https://otter.ai",desc:"AI transcription and meeting assistance.",s:{chat:4,coding:1,writing:6,research:2,image:1,app:1,beginner:9}},
+{name:"Gamma",cat:"Presentations",url:"https://gamma.app",desc:"AI-assisted presentations, documents and visual content.",s:{chat:5,coding:1,writing:8,research:3,image:5,app:2,beginner:10}},
+{name:"Tome",cat:"Presentations",url:"https://tome.app",desc:"AI storytelling and presentation creation.",s:{chat:5,coding:1,writing:7,research:3,image:5,app:1,beginner:9}},
+{name:"ElevenLabs",cat:"Voice",url:"https://elevenlabs.io",desc:"AI voice generation and speech technology.",s:{chat:2,coding:2,writing:3,research:1,image:1,app:2,beginner:8,voice:10}},
+{name:"Synthesia",cat:"Video & Voice",url:"https://www.synthesia.io",desc:"AI video creation using digital avatars.",s:{chat:3,coding:1,writing:4,research:1,image:5,app:1,beginner:9,voice:8}},
+{name:"HeyGen",cat:"Video & Voice",url:"https://www.heygen.com",desc:"AI avatar and video generation platform.",s:{chat:3,coding:1,writing:4,research:1,image:6,app:1,beginner:9,voice:8}},
+{name:"Descript",cat:"Audio & Video",url:"https://www.descript.com",desc:"AI-assisted audio and video editing.",s:{chat:3,coding:1,writing:5,research:1,image:5,app:1,beginner:9,voice:7}},
+{name:"Character.AI",cat:"Chat",url:"https://character.ai",desc:"Conversational AI focused on interactive characters.",s:{chat:9,coding:3,writing:5,research:2,image:2,app:1,beginner:10}},
+{name:"Phind",cat:"Coding & Search",url:"https://www.phind.com",desc:"AI search and answer tool aimed at technical questions.",s:{chat:7,coding:9,writing:4,research:9,image:1,app:7,beginner:8}},
+{name:"You.com",cat:"Search & Chat",url:"https://you.com",desc:"AI search and assistant platform.",s:{chat:8,coding:6,writing:7,research:8,image:3,app:4,beginner:9}},
+{name:"Mistral Le Chat",cat:"Chat",url:"https://chat.mistral.ai",desc:"General-purpose AI chat assistant.",s:{chat:8,coding:8,writing:7,research:6,image:3,app:6,beginner:8}},
+{name:"Hugging Face",cat:"AI Platform",url:"https://huggingface.co",desc:"Platform for discovering models, demos and AI development resources.",s:{chat:5,coding:9,writing:3,research:7,image:7,app:7,beginner:5}},
+{name:"Zapier AI",cat:"Automation",url:"https://zapier.com",desc:"Automation platform with AI-powered workflow features.",s:{chat:5,coding:4,writing:5,research:2,image:1,app:5,beginner:9,automation:10}},
+{name:"Make",cat:"Automation",url:"https://www.make.com",desc:"Visual workflow automation platform.",s:{chat:4,coding:5,writing:3,research:2,image:1,app:5,beginner:7,automation:10}},
+{name:"n8n",cat:"Automation",url:"https://n8n.io",desc:"Workflow automation platform for building custom integrations.",s:{chat:4,coding:7,writing:3,research:2,image:1,app:6,beginner:6,automation:10}},
+{name:"Figma AI",cat:"Design",url:"https://www.figma.com",desc:"Design platform with AI-assisted design and prototyping features.",s:{chat:3,coding:3,writing:3,research:1,image:8,app:5,beginner:8}}
+];
+
+const select1=document.getElementById('ai1'), select2=document.getElementById('ai2');
+tools.forEach((t,i)=>{[select1,select2].forEach(s=>{let o=document.createElement('option');o.value=i;o.textContent=t.name+' — '+t.cat;s.appendChild(o)})});
+select1.value=0; select2.value=2;
+
+document.getElementById('toolList').innerHTML=tools.map(t=>`<div class="tool"><h3>${t.name}</h3><span class="tag">${t.cat}</span><p class="muted">${t.desc}</p><a href="${t.url}" target="_blank" rel="noopener"><button class="secondary">Visit Official Site ↗</button></a></div>`).join('');
+
+function keywords(text){
+ text=text.toLowerCase();
+ const map={coding:['code','coding','program','website','web','developer','software'],app:['app','application','build an app','no code','nocode','mobile app'],writing:['write','writing','blog','caption','content','email','article','copy'],research:['research','search','study','sources','facts','latest','information'],image:['image','photo','picture','logo','design','poster','art'],chat:['chat','talk','answer','question','assistant'],music:['music','song','beat','audio'],voice:['voice','speech','voiceover'],automation:['automate','automation','workflow','automatic'],beginner:['beginner','easy','simple','no experience','new']};
+ let active=[]; for(const [k,arr] of Object.entries(map)) if(arr.some(w=>text.includes(w))) active.push(k);
+ return active.length?active:['chat','beginner'];
+}
+function calc(t,keys){let total=0;keys.forEach(k=>total+=(t.s[k]||3));return total/keys.length}
+function stars(n){return '★'.repeat(Math.round(n))+'☆'.repeat(10-Math.round(n))}
+function compare(){
+ const a=tools[select1.value],b=tools[select2.value], task=document.getElementById('task').value||'general AI work';
+ const keys=keywords(task), sa=calc(a,keys),sb=calc(b,keys);
+ const winner=sa===sb?a:b, loser=winner===a?b:a;
+ document.getElementById('result').style.display='block';
+ document.getElementById('winner').innerHTML=`<div>🏆 RECOMMENDED FOR YOUR TASK</div><h2>${winner.name}</h2><p class="muted">Task focus: ${keys.join(', ')} • Score: ${Math.max(sa,sb).toFixed(1)}/10</p><a href="${winner.url}" target="_blank" rel="noopener"><button class="primary">Try ${winner.name} ↗</button></a>`;
+ document.getElementById('cards').innerHTML=[a,b].map((t,i)=>`<div class="tool"><h3>${t.name} ${t===winner?'🏆':''}</h3><p class="score">${stars(calc(t,keys))} ${calc(t,keys).toFixed(1)}/10</p><p class="muted">${t.desc}</p>${keys.map(k=>`<span class="tag">${k}: ${t.s[k]||3}/10</span>`).join('')}</div>`).join('');
+ document.getElementById('reason').textContent=`For "${task}", WhichAI detected these priorities: ${keys.join(', ')}. ${winner.name} scored higher than ${loser.name} in the capabilities most related to your request. This is a structured recommendation, not a guarantee—compare current official features and pricing before deciding.`;
+ document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+function randomCompare(){
+ const examples=[
+ [0,1,'I am a student and want help researching a topic and understanding it simply.'],
+ [8,13,'I want to build a web app and I already know some coding.'],
+ [12,13,'I want to build an app without coding and I am a complete beginner.'],
+ [16,21,'I want to create professional images and social media designs.'],
+ [29,30,'I want to create an original song from an idea.']
+ ];
+ const e=examples[Math.floor(Math.random()*examples.length)];select1.value=e[0];select2.value=e[1];document.getElementById('task').value=e[2];compare();
+}
+</script>
+</body>
+</html>
